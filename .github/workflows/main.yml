@@ -49,7 +49,8 @@ jobs:
       with:
         name: final-model
         path: ./checkpoints/final_model.pth
-
+    - name: Publish Training Report
+      run: cat training_report.md >> $GITHUB_STEP_SUMMARY
   create_release:
     runs-on: self-hosted
     needs: training
@@ -71,7 +72,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.run_number }}
-        release_name: Release ${{ github.run_number }}
+        release_name: Train ${{ github.run_number }}
         draft: false
         prerelease: false
 

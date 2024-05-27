@@ -29,31 +29,33 @@ def train_model(config):
     model = SimpleCNN().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=config['training']['learning_rate'])
+    with open('training_report.md', 'w') as f:
+        f.write('| Epoch | Train Loss | Validation Loss |\n')
+        f.write('|-------|------------|-----------------|\n')        
+        # Training loop
+        for epoch in range(config['training']['epochs']):
+            print(f"Epoch {epoch + 1}/{config['training']['epochs']}")
+            model.train()
+            running_loss = 0.0
+            for batch_idx, (data, target) in enumerate(train_loader):
+                data, target = data.to(device), target.to(device)
+                optimizer.zero_grad()
+                output = model(data)
+                loss = criterion(output, target)
+                loss.backward()
+                optimizer.step()
+                running_loss += loss.item()
 
-    # Training loop
-    for epoch in range(config['training']['epochs']):
-        print(f"Epoch {epoch + 1}/{config['training']['epochs']}")
-        model.train()
-        running_loss = 0.0
-        for batch_idx, (data, target) in enumerate(train_loader):
-            data, target = data.to(device), target.to(device)
-            optimizer.zero_grad()
-            output = model(data)
-            loss = criterion(output, target)
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item()
+            train_loss = running_loss / len(train_loader)
+            val_loss = validate_model(model, criterion, val_loader, device)
+            f.write(f'| {epoch+1} | {train_loss:.4f} | {val_loss:.4f} |\n')
+            print(f"Training Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}")
 
-        train_loss = running_loss / len(train_loader)
-        val_loss = validate_model(model, criterion, val_loader, device)
-
-        print(f"Training Loss: {train_loss:.4f}, Validation Loss: {val_loss:.4f}")
-
-        # Save checkpoint
-        if (epoch + 1) % config['training']['checkpoint_interval'] == 0:
-            checkpoint_path = os.path.join(config['training']['checkpoint_dir'], f"checkpoint_epoch_{epoch + 1}.pth")
-            torch.save(model.state_dict(), checkpoint_path)
-            print(f"Checkpoint saved at {checkpoint_path}")
+            # Save checkpoint
+            if (epoch + 1) % config['training']['checkpoint_interval'] == 0:
+                checkpoint_path = os.path.join(config['training']['checkpoint_dir'], f"checkpoint_epoch_{epoch + 1}.pth")
+                torch.save(model.state_dict(), checkpoint_path)
+                print(f"Checkpoint saved at {checkpoint_path}")
 
     # Save the final model
     final_model_path = os.path.join(config['training']['checkpoint_dir'], 'final_model.pth')
