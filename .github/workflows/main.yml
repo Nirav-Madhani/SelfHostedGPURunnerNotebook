@@ -1,0 +1,107 @@
+name: PyTorch Training Workflow
+
+on: 
+  push:
+  workflow_dispatch:
+
+
+jobs:
+  data_preparation:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Data Preparation
+      run: |
+        python data_preparation.py --config config.yaml
+
+    - name: Upload data artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: prepared-data
+        path: ./data/mnist_train.pt
+
+  training:
+    runs-on: self-hosted
+    needs: data_preparation
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Download data artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: prepared-data
+        path: ./data
+
+    - name: Train Model
+      run: |
+        python train.py --config config.yaml --epochs 10
+
+    - name: Upload Final Model
+      uses: actions/upload-artifact@v2
+      with:
+        name: final-model
+        path: ./checkpoints/final_model.pth
+
+  create_release:
+    runs-on: self-hosted
+    needs: training
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Download Final Model Artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: final-model
+        path: ./checkpoints
+
+    - name: Get Latest Release Tag
+      id: get_latest_release
+      run: |
+        latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+        echo "::set-output name=latest_tag::$latest_tag"
+      shell: bash
+
+    - name: Increment Tag
+      id: increment_tag
+      run: |
+        if [ -z "${{ steps.get_latest_release.outputs.latest_tag }}" ]; then
+          new_tag="v1.0.0"
+        else
+          latest_tag=${{ steps.get_latest_release.outputs.latest_tag }}
+          IFS='.' read -r -a parts <<< "$latest_tag"
+          major=${parts[0]//[!0-9]/}
+          minor=${parts[1]}
+          patch=${parts[2]}
+          new_patch=$((patch + 1))
+          new_tag="v${major}.${minor}.${new_patch}"
+        fi
+        echo "::set-output name=new_tag::$new_tag"
+      shell: bash
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.increment_tag.outputs.new_tag }}
+        release_name: Release ${{ steps.increment_tag.outputs.new_tag }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./checkpoints/final_model.pth
+        asset_name: final_model.pth
+        asset_content_type: application/octet-stream
