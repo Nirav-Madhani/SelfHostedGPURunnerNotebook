@@ -60,22 +60,14 @@ jobs:
         name: final-model
         path: ./checkpoints
 
-    - name: Generate build number
-      uses: onyxmueller/build-tag-number@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Print new build number
-      run: echo "Build number is $BUILD_NUMBER"
-
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.BUILD_NUMBER }}
-        release_name: Release ${{ env.BUILD_NUMBER }}
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
 
