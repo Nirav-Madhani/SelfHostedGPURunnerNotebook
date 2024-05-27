@@ -30,6 +30,11 @@ def train_model(config):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=config['training']['learning_rate'])
     with open('training_report.md', 'w') as f:
+        f.write("# Job Report\n\n")
+        f.write("### Training Configuration:\n```yaml\n")
+        yaml.dump(config, f)
+        f.write("```\n\n")
+        f.write("### Loss:\n")
         f.write('| Epoch | Train Loss | Validation Loss |\n')
         f.write('|-------|------------|-----------------|\n')        
         # Training loop
