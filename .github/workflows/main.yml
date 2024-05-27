@@ -1,7 +1,9 @@
 name: PyTorch Training Workflow
+
 permissions:
   packages: write
   contents: write
+
 on: 
   push:
   workflow_dispatch:
@@ -62,18 +64,14 @@ jobs:
         name: final-model
         path: ./checkpoints
 
-    - name: Extract Tag Name
-      id: extract_tag
-      run: echo "::set-output name=TAG_NAME::${GITHUB_REF#refs/tags/}"
-
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.extract_tag.outputs.TAG_NAME }}
-        release_name: Release ${{ steps.extract_tag.outputs.TAG_NAME }}
+        tag_name: ${{ github.sha }}
+        release_name: Release ${{ github.sha }}
         draft: false
         prerelease: false
 
