@@ -4,7 +4,6 @@ on:
   push:
   workflow_dispatch:
 
-
 jobs:
   data_preparation:
     runs-on: self-hosted
@@ -39,7 +38,7 @@ jobs:
 
     - name: Train Model
       run: |
-        python train.py --config config.yaml --epochs 10
+        python train.py --config config.yaml
 
     - name: Upload Final Model
       uses: actions/upload-artifact@v2
@@ -63,10 +62,23 @@ jobs:
 
     - name: Get Latest Release Tag
       id: get_latest_release
-      run: |
-        latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-        echo "::set-output name=latest_tag::$latest_tag"
-      shell: bash
+      uses: actions/github-script@v6
+      with:
+        script: |
+          try {
+            const latestRelease = await github.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            core.setOutput('latest_tag', latestRelease.data.tag_name);
+          } catch (error) {
+            if (error.status === 404) {
+              core.setOutput('latest_tag', '');
+            } else {
+              throw error;
+            }
+          }
+
 
     - name: Increment Tag
       id: increment_tag

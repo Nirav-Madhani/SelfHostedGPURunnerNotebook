@@ -5,7 +5,7 @@ data_loader:
   batch_size: 64
 
 training:
-  epochs: 10
+  epochs: 1
   learning_rate: 0.001
   checkpoint_interval: 2
   checkpoint_dir: './checkpoints'
