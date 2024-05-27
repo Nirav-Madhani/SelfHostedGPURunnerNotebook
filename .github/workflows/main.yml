@@ -60,42 +60,13 @@ jobs:
         name: final-model
         path: ./checkpoints
 
-    - name: Get Latest Release Tag
-      id: get_latest_release
-      uses: actions/github-script@v6
+    - name: Generate build number
+      uses: onyxmueller/build-tag-number@v1
       with:
-        script: |
-          try {
-            const latestRelease = await github.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-            core.setOutput('latest_tag', latestRelease.data.tag_name);
-          } catch (error) {
-            if (error.status === 404) {
-              core.setOutput('latest_tag', '');
-            } else {
-              throw error;
-            }
-          }
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-
-    - name: Increment Tag
-      id: increment_tag
-      run: |
-        if [ -z "${{ steps.get_latest_release.outputs.latest_tag }}" ]; then
-          new_tag="v1.0.0"
-        else
-          latest_tag=${{ steps.get_latest_release.outputs.latest_tag }}
-          IFS='.' read -r -a parts <<< "$latest_tag"
-          major=${parts[0]//[!0-9]/}
-          minor=${parts[1]}
-          patch=${parts[2]}
-          new_patch=$((patch + 1))
-          new_tag="v${major}.${minor}.${new_patch}"
-        fi
-        echo "::set-output name=new_tag::$new_tag"
-      shell: bash
+    - name: Print new build number
+      run: echo "Build number is $BUILD_NUMBER"
 
     - name: Create GitHub Release
       id: create_release
@@ -103,8 +74,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.increment_tag.outputs.new_tag }}
-        release_name: Release ${{ steps.increment_tag.outputs.new_tag }}
+        tag_name: ${{ env.BUILD_NUMBER }}
+        release_name: Release ${{ env.BUILD_NUMBER }}
         draft: false
         prerelease: false
 
