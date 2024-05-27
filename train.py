@@ -20,7 +20,7 @@ def validate_model(model, criterion, data_loader, device):
 
 def train_model(config):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    print(f"Using device: {device}")
     # Load training and validation data
     train_loader = get_data_loader(config)
     val_loader = get_data_loader(config)  # Assuming the same function can be used for validation

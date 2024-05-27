@@ -1,5 +1,7 @@
 name: PyTorch Training Workflow
-
+permissions:
+  packages: write
+  contents: write
 on: 
   push:
   workflow_dispatch:
