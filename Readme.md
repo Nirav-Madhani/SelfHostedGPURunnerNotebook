@@ -47,11 +47,33 @@ This repository is primarily intended for students and learners with limited acc
 ## Complying with Terms of Service
 
 ### Colab
-To ensure compliance with Google Colab's terms of service while using it for CI/CD workflows, follow these guidelines:
+To ensure compliance with Google Colab's terms of service while using it for CI/CD workflows, here are some general guidelines:
 
 - **Usage Limits**: Do not use Colab for long-running processes or heavy workloads. Colab is intended for interactive use, and extended sessions can violate usage policies.
 - **Resource Management**: Be mindful of resource consumption. Avoid excessive GPU usage or running multiple sessions simultaneously.
 - **Code of Conduct**: Follow the community guidelines and Google's code of conduct for appropriate use of Colab services.
-- **General Note**: Always check the latest terms of service and usage policies for Colab to stay compliant and use these resources appropriately. Updates to the terms of service can be found on their respective pages: [Google Colab FAQ](https://research.google.com/colaboratory/faq.html).
 
-By adhering to these guidelines, you can effectively use cloud-based Jupyter notebooks for CI/CD without violating terms of service.
+**Note:** These instructions do not necessarily suffice to ensure full compliance with Colab's terms of service. Always review the latest terms and policies directly from Google Colab. [Google Colab FAQ](https://research.google.com/colaboratory/faq.html)
+
+### ⚠️ **Important: Avoid Using Self-Hosted Runners for Public Repositories**
+
+When managing CI/CD workflows in public repositories, it's crucial to avoid using self-hosted runners, ***especially for workflows triggered by pull requests from forks***. Using self-hosted runners in this context poses significant security risks:
+
+1. **Exposure to Malicious Code**: Self-hosted runners are vulnerable to attacks from malicious pull requests. An attacker can modify a workflow file in their fork to execute harmful code on your self-hosted runner, potentially stealing secrets or damaging your infrastructure [GitHub Docs](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions), [Legit Security](https://www.legitsecurity.com/blog/securing-your-ci-cd-pipeline-exploring-the-dangers-of-self-hosted-agents).
+
+2. **Access to Sensitive Information**: Self-hosted runners might have access to sensitive data and internal networks. If compromised, an attacker can exploit this access, leading to data breaches or further attacks on your network [Legit Security](https://www.legitsecurity.com/blog/securing-your-ci/cd-pipeline-exploring-the-dangers-of-self-hosted-agents).
+
+3. **Cryptocurrency Mining**: Attackers can exploit self-hosted runners to run cryptocurrency mining operations, violating terms of service and leading to increased costs and resource depletion. This abuse can also result in poorer performance for legitimate users of the service [Cloud Security Alliance](https://cloudsecurityalliance.org/blog/2022/02/28/massive-cryptomining-operation-using-github-actions/).
+
+4. **Theft of Google Drive and Other Google Data**: When using self-hosted runners on platforms like Google Colab, attackers can potentially access and steal data from your Google Drive and other linked Google services, leading to significant data breaches and privacy violations.
+
+**References**:
+- [GitHub Docs: Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions)
+- [Legit Security: Securing Your CI/CD Pipeline](https://www.legitsecurity.com/blog/securing-your-ci/cd-pipeline-exploring-the-dangers-of-self-hosted-agents)
+- [Cloud Security Alliance: Massive Cryptomining Operation Using GitHub Actions](https://cloudsecurityalliance.org/blog/2022/02/28/massive-cryptomining-operation-using-github-actions/)
+- [GitGuardian: GitHub Actions Security Best Practices](https://blog.gitguardian.com/github-actions-security-best-practices/)
+
+
+## Disclaimer
+
+THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS IN THE WORK.
